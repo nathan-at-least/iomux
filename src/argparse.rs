@@ -18,7 +18,7 @@ where
             if arg == "--" {
                 break;
             } else if let Some(s) = arg.to_str() {
-                if s.starts_with("---") {
+                if s.len() > 2 && s.chars().all(|c| c == '-') {
                     cmd.arg(&s[1..]);
                 } else {
                     cmd.arg(s);
