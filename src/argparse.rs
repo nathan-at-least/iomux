@@ -29,7 +29,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::build_commands;
-    use crate::todebug::ToDebug;
 
     macro_rules! debug_case {
         ( $name:ident, $expected:expr, [ $( $arg:expr ),* ] ) => {
@@ -37,7 +36,10 @@ mod tests {
             fn $name() {
                 let args: Vec<&str> = vec![ $( $arg ),* ];
                 let actual = build_commands(args);
-                assert_eq!($expected, actual.to_debug());
+                assert_eq!(
+                    $expected,
+                    format!("{:?}", actual)
+                );
             }
         }
     }

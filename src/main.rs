@@ -1,8 +1,5 @@
 #![deny(warnings)]
 
-#[cfg(test)]
-mod todebug;
-
 mod argparse;
 
 fn main() {
