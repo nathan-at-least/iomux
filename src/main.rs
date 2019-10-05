@@ -1,3 +1,13 @@
+#![deny(warnings)]
+
+#[cfg(test)]
+mod todebug;
+
+mod argparse;
+
 fn main() {
-    println!("Hello, world!");
+    use argparse::build_commands;
+    use std::env::args;
+
+    println!("{:?}", build_commands(args()));
 }
