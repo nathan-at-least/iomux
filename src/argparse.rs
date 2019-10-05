@@ -13,9 +13,16 @@ where
     let mut cmds = vec![];
     while let Some(cmd) = it.next() {
         let mut cmd = Command::new(cmd);
-        while let Some(arg) = it.next() {
-            if arg.as_ref() == "--" {
+        while let Some(argish) = it.next() {
+            let arg = argish.as_ref();
+            if arg == "--" {
                 break;
+            } else if let Some(s) = arg.to_str() {
+                if s.starts_with("---") {
+                    cmd.arg(&s[1..]);
+                } else {
+                    cmd.arg(s);
+                }
             } else {
                 cmd.arg(arg);
             }
@@ -46,4 +53,19 @@ mod tests {
 
     debug_case!(empty, "[]", []);
     debug_case!(no_args, "[]", ["selfprog"]);
+    debug_case!(
+        one_command,
+        "[\"echo\" \"hello\" \"world\"]",
+        ["selfprog", "echo", "hello", "world"]
+    );
+    debug_case!(
+        two_commands,
+        "[\"echo\" \"hello\" \"world\", \"date\"]",
+        ["selfprog", "echo", "hello", "world", "--", "date"]
+    );
+    debug_case!(
+        escaped_separator,
+        "[\"sh\" \"--\" \"foo\", \"date\"]",
+        ["selfprog", "sh", "---", "foo", "--", "date"]
+    );
 }
