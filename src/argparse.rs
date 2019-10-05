@@ -68,4 +68,14 @@ mod tests {
         "[\"sh\" \"--\" \"foo\", \"date\"]",
         ["selfprog", "sh", "---", "foo", "--", "date"]
     );
+    debug_case!(
+        escaped_escape,
+        "[\"sh\" \"---\" \"foo\", \"date\"]",
+        ["selfprog", "sh", "----", "foo", "--", "date"]
+    );
+    debug_case!(
+        tricky_nonescape,
+        "[\"weird\" \"---x\" \"foo\", \"date\"]",
+        ["selfprog", "weird", "---x", "foo", "--", "date"]
+    );
 }
