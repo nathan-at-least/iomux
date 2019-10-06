@@ -1,6 +1,6 @@
 use std::convert::AsRef;
 use std::ffi::OsStr;
-use std::process::Command;
+use tokio_process::Command;
 
 pub fn build_commands<T, I>(args: T) -> Vec<Command>
 where
@@ -55,27 +55,27 @@ mod tests {
     debug_case!(no_args, "[]", ["selfprog"]);
     debug_case!(
         one_command,
-        "[\"echo\" \"hello\" \"world\"]",
+        "[Command { std: \"echo\" \"hello\" \"world\" }]",
         ["selfprog", "echo", "hello", "world"]
     );
     debug_case!(
         two_commands,
-        "[\"echo\" \"hello\" \"world\", \"date\"]",
+        "[Command { std: \"echo\" \"hello\" \"world\" }, Command { std: \"date\" }]",
         ["selfprog", "echo", "hello", "world", "--", "date"]
     );
     debug_case!(
         escaped_separator,
-        "[\"sh\" \"--\" \"foo\", \"date\"]",
+        "[Command { std: \"sh\" \"--\" \"foo\" }, Command { std: \"date\" }]",
         ["selfprog", "sh", "---", "foo", "--", "date"]
     );
     debug_case!(
         escaped_escape,
-        "[\"sh\" \"---\" \"foo\", \"date\"]",
+        "[Command { std: \"sh\" \"---\" \"foo\" }, Command { std: \"date\" }]",
         ["selfprog", "sh", "----", "foo", "--", "date"]
     );
     debug_case!(
         tricky_nonescape,
-        "[\"weird\" \"---x\" \"foo\", \"date\"]",
+        "[Command { std: \"weird\" \"---x\" \"foo\" }, Command { std: \"date\" }]",
         ["selfprog", "weird", "---x", "foo", "--", "date"]
     );
 }
