@@ -1,6 +1,6 @@
 use std::convert::AsRef;
 use std::ffi::OsStr;
-use tokio_process::Command;
+use tokio::net::process::Command;
 
 pub fn build_commands<T, I>(args: T) -> Vec<Command>
 where
