@@ -5,4 +5,5 @@ authors = ["nathan <nathan+dev@electriccoin.co>"]
 edition = "2018"
 
 [dependencies]
+derive_more = "0.13.0"
 tokio = { version = "=0.2.0-alpha.6", features = ["process"] }
