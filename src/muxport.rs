@@ -1,9 +1,10 @@
 use crate::Res;
-use tokio::net::process::Command;
+use tokio::net::process::{Child, Command};
 
 
+#[derive(Debug)]
 pub struct MuxPort {
-    child: Command,
+    child: Child,
 }
 
 

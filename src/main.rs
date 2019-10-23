@@ -5,15 +5,14 @@ mod muxport;
 
 
 #[derive(Debug, derive_more::From)]
-enum Error {
+pub enum Error {
     Io(std::io::Error),
-    Tokio(tokio::io::Error),
 }
 
 type Res<T> = Result<T, Error>;
 
 
-fn main() -> std::io::Result<()> {
+fn main() -> Res<()> {
     use argparse::build_commands;
     use muxport::MuxPort;
     use std::env::args;
