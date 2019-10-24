@@ -1,5 +1,9 @@
 use crate::Res;
+use core::pin::Pin;
+use std::process::ExitStatus;
 use tokio::net::process::{Child, Command};
+use futures_util::future::Future;
+use futures_util::task::{Context, Poll};
 
 
 #[derive(Debug)]
@@ -22,5 +26,14 @@ impl MuxPort {
         }
 
         Ok(mps)
+    }
+}
+
+
+impl Future for MuxPort {
+    type Output = Result<ExitStatus, tokio::io::Error>;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+        self.child.poll(cx)
     }
 }
