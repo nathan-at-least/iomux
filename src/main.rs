@@ -3,7 +3,7 @@
 mod argparse;
 mod muxport;
 
-use futures_util::future::select_all;
+// use futures::select_all;
 
 
 #[derive(Debug, derive_more::From)]
@@ -23,7 +23,10 @@ async fn main() -> Res<()> {
     let commands = build_commands(args());
     let mps = MuxPort::launch_commands(commands)?;
 
-    println!("{:?}", select_all(mps).await);
+    for mp in mps {
+        println!("{:?}", mp);
+        println!("{:?}", mp.await);
+    }
 
     Ok(())
 }
