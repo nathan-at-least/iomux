@@ -1,6 +1,7 @@
 #![deny(warnings)]
 
 mod argparse;
+mod lpq;
 mod muxport;
 
 // use futures::select_all;
