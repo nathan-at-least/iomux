@@ -1,3 +1,6 @@
+use bytes::BufMut;
+
+
 #[derive(Debug)]
 pub struct LinePeekerQueue {
     buf: String,
@@ -5,6 +8,13 @@ pub struct LinePeekerQueue {
 }
 
 impl LinePeekerQueue {
+    pub fn new() -> LinePeekerQueue {
+        LinePeekerQueue {
+            buf: String::new(),
+            dropix: None,
+        }
+    }
+
     pub fn peek_drop_line(&mut self) -> Option<&str> {
         if let Some(ix) = self.dropix {
             self.buf.replace_range(..ix+1, "");
@@ -12,6 +22,20 @@ impl LinePeekerQueue {
 
         self.dropix = self.buf.find('\n');
         self.dropix.map(move |ix| &self.buf[..ix+1])
+    }
+}
+
+impl BufMut for LinePeekerQueue {
+    fn remaining_mut(&self) -> usize {
+        std::usize::MAX - self.buf.as_bytes().len()
+    }
+
+    unsafe fn advance_mut(&mut self, cnt: usize) {
+        self.buf.as_mut_vec().advance_mut(cnt)
+    }
+
+    unsafe fn bytes_mut(&mut self) -> &mut [u8] {
+        self.buf.as_mut_vec().bytes_mut()
     }
 }
 

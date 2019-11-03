@@ -26,7 +26,7 @@ async fn main() -> Res<()> {
 
     for mp in mps {
         println!("{:?}", mp);
-        println!("{:?}", mp.await);
+        // println!("{:?}", mp.await);
     }
 
     Ok(())
