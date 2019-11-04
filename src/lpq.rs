@@ -1,6 +1,5 @@
 use bytes::BufMut;
 
-
 #[derive(Debug)]
 pub struct LinePeekerQueue {
     buf: String,
@@ -17,11 +16,11 @@ impl LinePeekerQueue {
 
     pub fn peek_drop_line(&mut self) -> Option<&str> {
         if let Some(ix) = self.dropix {
-            self.buf.replace_range(..ix+1, "");
+            self.buf.replace_range(..ix + 1, "");
         }
 
         self.dropix = self.buf.find('\n');
-        self.dropix.map(move |ix| &self.buf[..ix+1])
+        self.dropix.map(move |ix| &self.buf[..ix + 1])
     }
 }
 
@@ -38,7 +37,6 @@ impl BufMut for LinePeekerQueue {
         self.buf.as_mut_vec().bytes_mut()
     }
 }
-
 
 #[cfg(test)]
 mod tests {

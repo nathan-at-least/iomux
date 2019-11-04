@@ -15,9 +15,7 @@ where
     while let Some(cmd) = it.next() {
         let mut cmd = Command::new(cmd);
 
-        cmd
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped());
+        cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
 
         while let Some(argish) = it.next() {
             let arg = argish.as_ref();
