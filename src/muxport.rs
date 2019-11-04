@@ -45,7 +45,7 @@ pub enum MuxStreamItem {
 impl Stream for MuxPort {
     type Item = Result<MuxStreamItem, tokio::io::Error>;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
         use tokio::future::Future;
         use tokio::io::AsyncRead;
         use Poll::{Ready, Pending};
@@ -53,8 +53,8 @@ impl Stream for MuxPort {
         fn poll_read_child_buf<R>(optsrc: &mut Option<R>, cx: &mut Context, lpq: &mut LinePeekerQueue) -> Poll<Result<String, tokio::io::Error>>
             where R: AsyncRead + std::marker::Unpin,
         {
-            if let Some(src) = *optsrc {
-                match AsyncRead::poll_read_buf(Pin::new(&mut src), cx, &mut lpq) {
+            if let &mut Some(ref mut src) = optsrc {
+                match AsyncRead::poll_read_buf(Pin::new(src), cx, lpq) {
                     Pending => Pending,
                     Ready(Err(e)) => Ready(Err(e)),
                     Ready(Ok(_bytecount)) => {
@@ -72,9 +72,9 @@ impl Stream for MuxPort {
 
         let unpinself = self.get_mut();
 
-        match poll_read_child_buf(unpinself.child.stdout(), cx, &mut self.outbuf) {
+        match poll_read_child_buf(unpinself.child.stdout(), cx, &mut unpinself.outbuf) {
             Ready(res) => Ready(Some(res.map(MuxStreamItem::OutLine))),
-            Pending => match poll_read_child_buf(unpinself.child.stderr(), cx, &mut self.errbuf) {
+            Pending => match poll_read_child_buf(unpinself.child.stderr(), cx, &mut unpinself.errbuf) {
                 Ready(res) => Ready(Some(res.map(MuxStreamItem::ErrLine))),
                 Pending => match Future::poll(Pin::new(&mut unpinself.child), cx) {
                     Ready(res) => Ready(Some(res.map(MuxStreamItem::Status))),
