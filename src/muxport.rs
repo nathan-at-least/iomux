@@ -32,6 +32,7 @@ impl MuxPort {
     }
 }
 
+#[derive(Debug)]
 pub enum MuxStreamItem {
     OutLine(String),
     ErrLine(String),

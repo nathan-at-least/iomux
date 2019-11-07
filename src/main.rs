@@ -20,11 +20,23 @@ async fn main() -> Res<()> {
     use std::env::args;
 
     let commands = build_commands(args());
-    let mps = MuxPort::launch_commands(commands)?;
+    assert_eq!(
+        commands.len(),
+        1,
+        "only single command supported right now..."
+    );
 
-    for mp in mps {
-        println!("{:?}", mp);
-        // println!("{:?}", mp.await);
+    let mut mps = MuxPort::launch_commands(commands)?;
+    assert_eq!(mps.len(), 1, "only single command supported right now...");
+
+    {
+        use tokio::prelude::*;
+
+        let mp = &mut mps[0];
+
+        while let Some(msitem) = mp.next().await {
+            println!("{:?}", msitem);
+        }
     }
 
     Ok(())
