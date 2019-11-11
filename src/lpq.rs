@@ -112,68 +112,53 @@ mod tests {
             assert_eq!(None, lpq.peek_drop_line());
         }
     ]);
-}
 
-#[cfg(test)]
-mod tests_old {
-    use super::LinePeekerQueue;
-
-    fn make(s: &str) -> LinePeekerQueue {
-        LinePeekerQueue {
-            buf: s.into(),
-            dropix: None,
-        }
-    }
-
-    mod empty {
-        use super::make;
-
-        #[test]
-        fn peek_drop_line() {
-            let mut lpq = make("");
-            assert_eq!(None, lpq.peek_drop_line());
-        }
-
-        #[test]
-        fn peek_drop_line_idempotent() {
-            let mut lpq = make("");
-            assert_eq!(None, lpq.peek_drop_line());
-            assert_eq!(None, lpq.peek_drop_line());
-        }
-
-        #[test]
-        fn peek_drop_line_or_end_idempotent() {
-            let mut lpq = make("");
-            assert_eq!(None, lpq.peek_drop_line_or_end());
-            assert_eq!(None, lpq.peek_drop_line_or_end());
-        }
-
-        #[test]
-        fn peek_drop_line_then_peek_drop_line_or_end() {
-            let mut lpq = make("");
-            assert_eq!(None, lpq.peek_drop_line());
-            assert_eq!(None, lpq.peek_drop_line_or_end());
-        }
-
-        #[test]
-        fn peek_drop_line_or_end_then_peek_drop_line() {
-            let mut lpq = make("");
-            assert_eq!(None, lpq.peek_drop_line_or_end());
-            assert_eq!(None, lpq.peek_drop_line());
-        }
-    }
-
-    #[test]
-    fn peek_drop_two_lines() {
-        for &vector in &["foo\nbarf\n", "foo\nbarf\nquxum"] {
-            let mut lpq = make(vector);
-
+    tests_for_vector!(foo_barf, "foo\nbarf\n", [
+        peek_drop_line:
+        |mut lpq: LinePeekerQueue| {
             assert_eq!(Some("foo\n"), lpq.peek_drop_line());
             assert_eq!(Some("barf\n"), lpq.peek_drop_line());
             assert_eq!(None, lpq.peek_drop_line());
             assert_eq!(None, lpq.peek_drop_line());
-            assert_eq!(Some("quxum"), lpq.peek_drop_line_or_end());
+        },
+
+        peek_drop_line_or_end:
+        |mut lpq: LinePeekerQueue| {
+            assert_eq!(Some("foo\n"), lpq.peek_drop_line_or_end());
+            assert_eq!(Some("barf\n"), lpq.peek_drop_line_or_end());
+            assert_eq!(None, lpq.peek_drop_line_or_end());
             assert_eq!(None, lpq.peek_drop_line_or_end());
         }
-    }
+    ]);
+
+    tests_for_vector!(foo_barf_quxum, "foo\nbarf\nquxum", [
+        peek_drop_line:
+        |mut lpq: LinePeekerQueue| {
+            assert_eq!(Some("foo\n"), lpq.peek_drop_line());
+            assert_eq!(Some("barf\n"), lpq.peek_drop_line());
+            assert_eq!(None, lpq.peek_drop_line());
+            assert_eq!(None, lpq.peek_drop_line());
+        },
+
+        peek_drop_line_or_end:
+        |mut lpq: LinePeekerQueue| {
+            assert_eq!(Some("foo\n"), lpq.peek_drop_line_or_end());
+            assert_eq!(Some("barf\n"), lpq.peek_drop_line_or_end());
+            assert_eq!(Some("quxum"), lpq.peek_drop_line_or_end());
+            assert_eq!(None, lpq.peek_drop_line_or_end());
+            assert_eq!(None, lpq.peek_drop_line_or_end());
+        },
+
+        peek_drop_line_until_none_then_or_end:
+        |mut lpq: LinePeekerQueue| {
+            assert_eq!(Some("foo\n"), lpq.peek_drop_line());
+            assert_eq!(Some("barf\n"), lpq.peek_drop_line());
+            assert_eq!(None, lpq.peek_drop_line());
+            assert_eq!(None, lpq.peek_drop_line());
+
+            assert_eq!(Some("quxum"), lpq.peek_drop_line_or_end());
+            assert_eq!(None, lpq.peek_drop_line_or_end());
+            assert_eq!(None, lpq.peek_drop_line_or_end());
+        }
+    ]);
 }
