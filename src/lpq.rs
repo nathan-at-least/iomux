@@ -35,7 +35,7 @@ impl LinePeekerQueue {
             "DEBUG {:?}.peek_drop({:?}) after dropix update.",
             &self, end
         );
-        if end {
+        if end && self.buf.len() > 0 {
             self.dropix = self.dropix.or(Some(self.buf.len()));
             println!(
                 "DEBUG {:?}.peek_drop({:?}) after end=true update",
