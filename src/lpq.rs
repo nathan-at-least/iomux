@@ -23,28 +23,15 @@ impl LinePeekerQueue {
     }
 
     fn peek_drop(&mut self, end: bool) -> Option<&str> {
-        println!("DEBUG {:?}.peek_drop({:?})...", &self, end);
         if let Some(ix) = self.dropix {
             self.buf.replace_range(..ix, "");
         }
 
-        println!("DEBUG {:?}.peek_drop({:?}) after replace.", &self, end);
-
         self.dropix = self.buf.find('\n').map(|ix| ix + 1);
-        println!(
-            "DEBUG {:?}.peek_drop({:?}) after dropix update.",
-            &self, end
-        );
         if end && self.buf.len() > 0 {
             self.dropix = self.dropix.or(Some(self.buf.len()));
-            println!(
-                "DEBUG {:?}.peek_drop({:?}) after end=true update",
-                &self, end
-            );
         }
-        let result = self.dropix.map(move |ix| &self.buf[..ix]);
-        println!("DEBUG returning -> {:?}", &result);
-        result
+        self.dropix.map(move |ix| &self.buf[..ix])
     }
 }
 
