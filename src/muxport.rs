@@ -8,7 +8,7 @@ use tokio::stream::Stream;
 
 #[derive(Debug)]
 pub struct MuxPort {
-    child: Child,
+    child: Option<Child>,
     outbuf: LinePeekerQueue,
     errbuf: LinePeekerQueue,
 }
@@ -20,7 +20,7 @@ impl MuxPort {
 
         for mut cmd in cmds {
             let mp = MuxPort {
-                child: cmd.spawn()?,
+                child: Some(cmd.spawn()?),
                 outbuf: LinePeekerQueue::new(),
                 errbuf: LinePeekerQueue::new(),
             };
@@ -74,16 +74,27 @@ impl Stream for MuxPort {
 
         let unpinself = self.get_mut();
 
-        match poll_read_child_buf(unpinself.child.stdout(), cx, &mut unpinself.outbuf) {
-            Ready(res) => Ready(Some(res.map(MuxStreamItem::OutLine))),
-            Pending => {
-                match poll_read_child_buf(unpinself.child.stderr(), cx, &mut unpinself.errbuf) {
+        if let Some(ref mut child) = unpinself.child {
+            match poll_read_child_buf(child.stdout(), cx, &mut unpinself.outbuf) {
+                Ready(res) => Ready(Some(res.map(MuxStreamItem::OutLine))),
+                Pending => match poll_read_child_buf(child.stderr(), cx, &mut unpinself.errbuf) {
                     Ready(res) => Ready(Some(res.map(MuxStreamItem::ErrLine))),
-                    Pending => match Future::poll(Pin::new(&mut unpinself.child), cx) {
-                        Ready(res) => Ready(Some(res.map(MuxStreamItem::Status))),
+                    Pending => match Future::poll(Pin::new(child), cx) {
+                        Ready(res) => {
+                            unpinself.child = None;
+                            Ready(Some(res.map(MuxStreamItem::Status)))
+                        }
                         Pending => Poll::Pending,
                     },
-                }
+                },
+            }
+        } else {
+            if let Some(s) = unpinself.outbuf.peek_drop_line_or_end() {
+                Ready(Some(Ok(MuxStreamItem::OutLine(String::from(s)))))
+            } else if let Some(s) = unpinself.errbuf.peek_drop_line_or_end() {
+                Ready(Some(Ok(MuxStreamItem::ErrLine(String::from(s)))))
+            } else {
+                Ready(None)
             }
         }
     }
